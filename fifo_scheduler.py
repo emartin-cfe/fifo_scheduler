@@ -43,6 +43,7 @@ class Worker:
 	def __init__(self, resource):
 		self.resource_allocated = resource
 		self.process = None
+		self.curr_job = None
 
  	def available_for_work(self):
 
@@ -70,11 +71,16 @@ class Worker:
 	def start_job(self,job):
 		"""Run command using resource + open unbuffered files and pipe stdout/error to them"""
 		if not self.available_for_work(): raise Exception('Worker currently allocated')
+
+		# If a previous job was processed, close it's file handles
+		if self.curr_job is not None: self.curr_job.teardown()
+
 		command = "{} {}".format(self.resource_allocated, job.shell_command)
 		job.standard_out_f = open(job.standard_output, "a", 0) if job.standard_output != None else sys.stdout
 		job.standard_error_f = open(job.standard_error, "a", 0) if job.standard_error != None else sys.stderr
 		self.process = subprocess.Popen(command, shell=True, stdout=job.standard_out_f, stderr=job.standard_error_f)
 		atexit.register(self.clean_terminate)		# Terminate child if parent terminates
+		self.curr_job = job
 		return self.process, command
 
 		
