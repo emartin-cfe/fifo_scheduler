@@ -61,6 +61,12 @@ class Worker:
 
 		return False
 
+	def clean_terminate(self):
+		try:
+			self.process.terminate()
+		except:
+			pass
+
 	def start_job(self,job):
 		"""Run command using resource + open unbuffered files and pipe stdout/error to them"""
 		if not self.available_for_work(): raise Exception('Worker currently allocated')
@@ -68,8 +74,10 @@ class Worker:
 		job.standard_out_f = open(job.standard_output, "a", 0) if job.standard_output != None else sys.stdout
 		job.standard_error_f = open(job.standard_error, "a", 0) if job.standard_error != None else sys.stderr
 		self.process = subprocess.Popen(command, shell=True, stdout=job.standard_out_f, stderr=job.standard_error_f)
-		atexit.register(self.process.terminate)		# Terminate child if parent terminates
+		atexit.register(self.clean_terminate)		# Terminate child if parent terminates
 		return self.process, command
+
+		
 
 class Factory:
 	"""Factories have a queue of jobs and workers to work on them"""	
