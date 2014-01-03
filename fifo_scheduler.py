@@ -58,8 +58,9 @@ class Worker:
 			# If previous process terminated with a non-zero exit code, this error code is reported
 			if returncode != 0:
 				import datetime
-				date_time = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S.%f")
-				print "{} [ERROR] - Previous pid {} returned non-zero exit code {}".format(self.process.pid, returncode)
+				curr_datetime = datetime.datetime.now()
+				formatted_datetime = curr_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
+				print "pid {} returned non-zero exit code {} at {}".format(self.process.pid, returncode, formatted_datetime)
 			return True
 		return False
 
