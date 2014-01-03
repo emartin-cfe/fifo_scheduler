@@ -13,8 +13,7 @@ root = "/data/miseq/0_FACTORY_TEST"
 refs = "/usr/local/share/miseq/refs/cfe"
 num_pthreads = 8 
 
-R1_files = glob(root + '/*R1*')
-for R1_fastq in R1_files:
+for R1_fastq in glob(root + '/*R1*'):
 	R2_fastq = R1_fastq.replace("R1", "R2")
 	fields = os.path.basename(R1_fastq).split("_")
 	sam_output = "{}/{}.sam".format(root,fields[0])
@@ -22,17 +21,17 @@ for R1_fastq in R1_files:
 	print "QUEUING: {}".format(command)
 
 	# If queue_work() is done while workers are idle, a tuple containing the popen
-	# spawned, along with the request you originally fed in is returned
+	# is spawned, and the request you originally fed in is returned
 	queue_request = mapping_factory.queue_work(command)
 	if queue_request:
 		p, command = queue_request
 		print "STARTED: pID {}, {}".format(p.pid, command)
 
-# At a natural barrier, poll Factory.completely_idle() while calling Factory.supervise()
+# At a natural barrier, call Factory.supervise() while polling Factory.completely_idle()
 while True:
 
-	# The return value of supervise() is similar to queue_work() - if it successfully
-	# pairs pending work with available workers, it returns a (popen, command) tuple
+	# Factory.supervise() is similar to Factory.queue_work() - if it successfully pairs
+	# pending work with available workers, it returns a list of (popen, command) tuples
 	processes_spawned = mapping_factory.supervise()
 	if processes_spawned:
 		for popen_object, command_invoked in processes_spawned:

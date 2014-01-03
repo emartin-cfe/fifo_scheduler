@@ -3,8 +3,8 @@ from Queue import Queue
 
 class Job:
 	"""
-	A job is a shell command + file paths to write standard out/error.
-	If file paths are undefined, output to console instead.
+	A job is a shell command + optional file paths for stdout/stderr.
+	If file paths are undefined, outputs default to the console.
 	"""
 
 	def __init__(self, shell_command, standard_output=None, standard_error=None):
@@ -57,9 +57,10 @@ class Worker:
 
 			# If previous process terminated with a non-zero exit code, this error code is reported
 			if returncode != 0:
-				print "Previous pid {} returned non-zero exit code {}".format(self.process.pid, returncode)
+				import datetime
+				date_time = datetime.datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S.%f")
+				print "{} [ERROR] - Previous pid {} returned non-zero exit code {}".format(self.process.pid, returncode)
 			return True
-
 		return False
 
 	def clean_terminate(self):
@@ -82,8 +83,6 @@ class Worker:
 		atexit.register(self.clean_terminate)		# Terminate child if parent terminates
 		self.curr_job = job
 		return self.process, command
-
-		
 
 class Factory:
 	"""Factories have a queue of jobs and workers to work on them"""	
