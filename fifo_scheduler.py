@@ -55,13 +55,17 @@ class Worker:
 		returncode = self.process.poll()
 		if returncode is not None:
 
-			# If previous process terminated with a non-zero exit code, this error code is reported
+			# If previous process terminated with non-zero exit code, report it and clear worker for work
 			if returncode != 0:
 				import datetime
 				curr_datetime = datetime.datetime.now()
 				formatted_datetime = curr_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
-				print "pid {} returned non-zero exit code {} at {}".format(self.process.pid, returncode, formatted_datetime)
+				sys.stderr.write("{} - pid {} returned non-zero exit code '{}' from command '{}'\n".format(formatted_datetime,
+						self.process.pid, returncode, self.curr_job.shell_command))
+				self.process = None
+
 			return True
+
 		return False
 
 	def clean_terminate(self):
@@ -72,6 +76,7 @@ class Worker:
 
 	def start_job(self,job):
 		"""Run command using resource + open unbuffered files and pipe stdout/error to them"""
+
 		if not self.available_for_work(): raise Exception('Worker currently allocated')
 
 		# If a previous job was processed, close it's file handles
