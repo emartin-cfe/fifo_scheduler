@@ -1,4 +1,4 @@
-import atexit, subprocess, sys, time
+import atexit, subprocess, sys
 from Queue import Queue
 
 class Job:
@@ -33,9 +33,9 @@ class Job_Queue:
 	def jobs_outstanding(self):
 		return self.num_jobs() != 0
 
- 	def get_next_job(self):
+	def get_next_job(self):
 		"""Return next Job + remove it from the queue"""
- 		if self.jobs_outstanding(): return self.jobs.get()
+		if self.jobs_outstanding(): return self.jobs.get()
 		raise Exception("No jobs in queue")
 
 class Worker:
@@ -45,7 +45,7 @@ class Worker:
 		self.process = None
 		self.curr_job = None
 
- 	def available_for_work(self):
+	def available_for_work(self):
 
 		# Worker was never allocated a job
 		if self.process is None:
@@ -98,7 +98,7 @@ class Factory:
 		self.jobs = Job_Queue()
 
 		for resource, number in assigned_resources:
-			for i in range(number):
+			for _ in range(number):
 				self.hire_worker(resource)
 
 	def hire_worker(self,resource):
