@@ -83,10 +83,17 @@ class Worker:
 		if self.curr_job is not None: self.curr_job.teardown()
 
 		command = "{} {}".format(self.resource_allocated, job.shell_command)
+
+		# If job standard in/out is specified to be sent to a file, do so - else default to sys stdout/stderr
 		job.standard_out_f = open(job.standard_output, "a", 0) if job.standard_output != None else sys.stdout
 		job.standard_error_f = open(job.standard_error, "a", 0) if job.standard_error != None else sys.stderr
+
+		# We use subprocess but the pipeline still expects shell=True access for bash operators (>, >>, |, etc)
+		# FIXME: Change to shell=False but only after the pipeline has been migrated
 		self.process = subprocess.Popen(command, shell=True, stdout=job.standard_out_f, stderr=job.standard_error_f)
-		atexit.register(self.clean_terminate)		# Terminate child if parent terminates
+
+		# Terminate child gracefully if parent terminates gracefully
+		atexit.register(self.clean_terminate)
 		self.curr_job = job
 		return self.process, command
 
